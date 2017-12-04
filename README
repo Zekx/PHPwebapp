@@ -1,0 +1,18 @@
+Collision-Point (PHP + AngularJS)
+
+Personal website portfolio and blog. It runs on PHP+AngularJS while maintaining data on a separate MySQL database. Further functionalities will be created further along the lines of development.
+
+Current Funtionalities Include:
+
+Homepage with post view
+Login/Logout authentication
+My own resume view
+
+Current development:
+Post creation on the blogsite
+
+
+This website utilizes the following libraries:
+JQuery
+AngularJS
+Quill.js
