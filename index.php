@@ -26,6 +26,14 @@
                 src="https://code.angularjs.org/1.6.5/angular-sanitize.js"
                 asp-fallback-src="/Scripts/angular-sanitize.js"></script>
         <script type="text/javascript" src="/Scripts/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        
+        <!-- Main Quill library -->
+        <script src="//cdn.quilljs.com/1.3.1/quill.min.js"></script>
+
+        <!-- Theme included stylesheets -->
+        <link href="//cdn.quilljs.com/1.3.1/quill.snow.css" rel="stylesheet">
+        
         <script src="index.js"></script>
     </head>
 
@@ -51,7 +59,11 @@
 
 
                         <ul class="nav navbar-nav navbar-right">
-
+                            <?php
+                                if(isset($_SESSION['logged'])){
+                                    echo "<li><a class=\"btn btn-info btn-sm\" data-toggle=\"modal\" data-target=\"#postModal\" />New Post</a></li>";
+                                }
+                            ?>
                             <li><a href="https://www.facebook.com/brandon.ung.37?ref=br_rs"><img src="/Content/Images/facebook.png" style="width:25px;height:25px;" /></a></li>
                             <li><a href="https://www.linkedin.com/in/brandon-ung-2286b0b0/"><img src="/Content/Images/linkedin.png" style="width:25px;height:25px;" /></a></li>
                         </ul>
@@ -59,8 +71,8 @@
                     </div>
                 </div>
             </nav>
-        
-        
+            
+            <div ng-include="createView.url"></div>
             <div ng-include="currentView.url"></div>
         </div>
 	</body>
@@ -78,28 +90,69 @@
                 $.ajax({
                     method: "POST",
                     url: "../Controllers/BlogController.php",
-                    data: {action: "getPosts"},
+                    data: {
+                        action: "getPosts"
+                    },
                     dataType: "json",
                     success: function(data){                            
                         angular.element(document.getElementById('homeView')).scope().addPosts(data);
                         angular.element(document.getElementById('homeView')).scope().$apply();
                     },
                     error: function(xhr, status, error){
-                        console.log(xhr);
+                        console.log(xhr.responseText);
                     }
                 })
             }
         
-           $(document).ready(function(){
+        function addPost() {
+            var top = document.getElementById("createTitle").value;
+            var bod = document.querySelector(".ql-editor").innerHTML;
+
+            var dataPost = {
+                action: 'createPost',
+                topic: top,
+                body: bod
+            };
+            
+            //Make sure to JSON.stringify your data. Ajax will send an error message if the formatting is wrong.
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: '/Controllers/BlogController.php',
+                data: dataPost,
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.responseText);
+                }
+            });
+        };
+        
+         $(document).ready(function(){
                <?php
                     if($_SERVER['QUERY_STRING'] == "login"){
                         echo "switchPage(2);";
                         echo "getPosts();";
                     }
-                    else{
                         echo "getPosts();";
-                    }
                 ?>
+               
+               $('#postModal').on('shown.bs.modal', function () {
+                    console.log("hello");
+
+                    var container = document.getElementById('editor');
+                    var editor = new Quill('container', {
+                        modules: {
+                            toolbar: [
+                                [{ header: [1, 2, false] }],
+                                ['bold', 'italic', 'underline'],
+                                ['code-block']
+                            ]
+                        },
+                        theme: 'snow'  // or 'bubble',
+                    });
+                })
             })
     </script>
 </html>

@@ -9,7 +9,8 @@ function indexController($scope, $route, $routeParams, $location, $http, $sce){
     $scope.view = [
         {name: 'homepage', url: "/Web/Blog/Home.php"},
         {name: 'resume', url: "/Web/Resume/ResumeLayout.php"},
-        {name: 'login', url: "/Web/Blog/Login.php"}
+        {name: 'login', url: "/Web/Blog/Login.php"},
+        {name: 'postCreate', url: "/Web/Blog/postCreate.php"}
     ];
     
     $scope.addPosts = function(data){
@@ -28,6 +29,7 @@ function indexController($scope, $route, $routeParams, $location, $http, $sce){
     };
     
     $scope.currentView = $scope.view[0];
+    $scope.createView = $scope.view[3];
 }]);
 
 index.controller("resumeController", ['$scope', '$route', '$routeParams', '$location', '$http',                               

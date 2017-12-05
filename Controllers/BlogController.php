@@ -45,6 +45,14 @@
         }
     }
 
+    function createPost(){
+        if(!isset($_POST['topic']) && !isset($_POST['body'])){
+            exit;
+        }
+        
+        echo json_encode(array("topic"=>$_POST['topic'], "body"=>$_POST['body']));
+    }
+
     function login(){
         //Check if the username and password have been given.
         if(!isset($_POST['username']) || $_POST['username'] == null){
@@ -67,6 +75,7 @@
                 unset($_SESSION['error']);
             }
             $_SESSION["user"] = $user->username;
+            $_SESSION["logged"] = true;
             
             header("Location:" . ' http://localhost/index.php');
             exit;
@@ -78,11 +87,21 @@
         }
     }
 
+    function logout(){
+        unset($_SESSION['user']);
+        unset($_SESSION['logged']);
+        
+        header("Location: {$_SERVER['HTTP_REFERER']}");
+        exit;
+    }
+
     if(isset($_POST['action']) && !empty($_POST['action'])){
         $action = $_POST['action'];
         switch($action){
             case 'getPosts' : getPosts(); break;
             case 'login' : login(); break;  
+            case 'logout' : logout(); break;
+            case 'createPost' : createPost(); break;
         }
     }
 ?>

@@ -8,7 +8,7 @@
     <?php    
         echo "<h2 style=\"color:red\">" . $_SESSION['error'] . "</h2>";
     
-        if(!isset($_SESSION['user'])){
+        if(!isset($_SESSION['logged'])){
             echo "<form id=\"loginForm\" action=\"/Controllers/BlogController.php\" method=\"post\">";
             echo    "<input type=\"hidden\" name=\"action\" value=\"login\">";
             
@@ -26,6 +26,13 @@
         }
         else{
             echo "<h2>You are already logged in " . $_SESSION['user'] . "!</h2>";
+            echo "<form id=\"loginForm\" action=\"/Controllers/BlogController.php\" method=\"post\">";
+            
+            echo    "<input type=\"hidden\" name=\"action\" value=\"logout\">";
+            
+            echo    "<input type=\"submit\" value=\"Logout\" class=\"btn btn-secondary\" id=\"loginBtn\"/>";
+            
+            echo"</form>";
         }
     ?>
 </div>
