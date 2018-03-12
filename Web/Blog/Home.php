@@ -1,4 +1,4 @@
-<div>
+<div id="homeView">
     
     <style>
         #corner {
@@ -8,6 +8,10 @@
             height: 130px;
             background-color: gold;
             color: black;
+        }
+        
+        div{
+            float: left;
         }
 
     </style>
@@ -23,13 +27,45 @@
 
     </div>
 
-    <div id="posts">
-        <div ng-repeat="x in postData">
-            <h2>{{x.title}} <small>{{x.author}}</small></h2><br/>
-            <p ng-bind-html="x.body"></p>
-            
-            <footer><small>Posted on {{x.datePosted}}</small></footer>
-            <hr style="border: 3px outset #595955;">
+    <div id="posts" style="width:80%">
+        <div ng-repeat="x in postData track by $index">
+            <div ng-if="x.removed != true">
+                <h2>{{x.title}} <small> By: {{x.author}}</small></h2><br/>
+                <p ng-bind-html="x.body"></p>
+
+                <footer align="right"><small>Posted on {{x.datePosted}}</small> 
+                <div ng-if="loggedIn != null">
+                    <a href="/#!/editPost?id={{x.id}}" align="right">Edit</a> <a align="right">Remove</a>
+                </div>
+                </footer>
+                <hr style="border: 3px outset #595955;">
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    function getPosts(){
+            console.log("Retrieving Posts...");
+                $.ajax({
+                    method: "POST",
+                    url: "../../Controllers/BlogController.php",
+                    data: {
+                        action: "getPosts"
+                    },
+                    dataType: "json",
+                    success: function(data){   
+                       
+                       console.log(data); /*angular.element(document.getElementById('homeView')).scope().addPosts(data);
+                        angular.element(document.getElementById('homeView')).scope().$apply();*/
+                    },
+                    error: function(xhr, status, error){
+                        console.log(xhr.responseText);
+                    }
+                })
+            };
+    $(document).ready(function() {
+        //getPosts();
+    });
+    
+</script>

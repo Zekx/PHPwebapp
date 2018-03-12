@@ -15,7 +15,7 @@ create table posts(
     CONSTRAINT fk_author foreign key (userid) references users(id), 
     title		text not null,
     body		longtext not null,
-    datePosted	date,
+    datePosted	datetime,
     removed		boolean
 );
 

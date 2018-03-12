@@ -1,38 +1,72 @@
-var index = angular.module("index", ['ngRoute', 'ngAnimate', 'ngSanitize']);
-
-index.controller("indexController", ['$scope', '$route', '$routeParams', '$location', '$http', '$sce',
-function indexController($scope, $route, $routeParams, $location, $http, $sce){
+angular.module("index", ['ngRoute', 'ngAnimate', 'ngSanitize', 'ui.router', 'ngIdle'])
+.controller("indexController", ['$scope', '$route', '$routeParams', '$location', '$http', '$sce', '$state', '$window', 'authProvider',
+function indexController($scope, $route, $routeParams, $location, $http, $sce, $state, $window, authProvider){
     this.$route = $route;
     this.$location = $location;
     this.$routeParams = $routeParams;
     
-    $scope.view = [
-        {name: 'homepage', url: "/Web/Blog/Home.php"},
-        {name: 'resume', url: "/Web/Resume/ResumeLayout.php"},
-        {name: 'login', url: "/Web/Blog/Login.php"},
-        {name: 'postCreate', url: "/Web/Blog/postCreate.php"}
-    ];
+    $scope.user = null;
+    $scope.logged = authProvider.isLoggedIn();
     
-    $scope.addPosts = function(data){
-        for(var i = 0; i < data.length ; i++){
-            data.body = $sce.trustAsHtml(data.body);
-        }
-        $scope.postData = data;
+    //Login Credentials
+    $scope.credentials = {
+        'username': '',
+        'password': '',
+        'action': ''
     };
     
-    $scope.changePage = function (num){
-        $scope.currentView = $scope.view[num];
-        if(num == 0){
-           $scope.addPosts($scope.postData);
-        }
-        $scope.$apply();
-    };
-    
-    $scope.currentView = $scope.view[0];
-    $scope.createView = $scope.view[3];
-}]);
+    $scope.login = function(){
+        $window.alert("bye");
+    }
 
-index.controller("resumeController", ['$scope', '$route', '$routeParams', '$location', '$http',                               
+    //Get post information from datbase...
+    $scope.getPosts = function(){
+        $window.alert('hello');
+        
+        $http({
+            method: "POST",
+            url: "/Controllers/BlogController.php",
+            data: {
+                action: "getPosts"
+            },
+            headers: {
+                'Content-type': 'application/json'
+            }
+        }).then(function (response){//on success
+            for(var i = 0; i < response.data.length ; i++){
+                response.data.body = $sce.trustAsHtml(response.data.body);
+            }
+            $scope.postData = response.data;
+            
+        }, function(response){//on failure
+            console.log(response.data,response.status);
+        });
+    };
+    
+    $scope.changeState = function(loc, param){
+        $state.go(loc, param);
+        
+        if($state.current.authenticate && !authProvider.isLoggedIn()){
+           redirectIfNotAuth();
+        }
+    };
+    
+    //Check if currentPage is accessible...
+    function redirectIfNotAuth(){
+        $state.go("Home", {});
+    }
+    
+    //------------------------------------------------------------------
+    
+    //automatically converge to Homepage
+    if($state.current.authenticate && !authProvider.isLoggedIn()){
+       $location.path("/");
+    }
+    else{
+        $scope.getPosts();
+    }
+    
+}]).controller("resumeController", ['$scope', '$route', '$routeParams', '$location', '$http',                               
     function resumeController($scope, $route, $routeParams, $location, $http) {
         
     this.$route = $route;
@@ -87,4 +121,78 @@ index.controller("resumeController", ['$scope', '$route', '$routeParams', '$loca
         };
     
     $scope.template = $scope.templates[0];
-}]);
+}])
+.factory('authProvider', function() {
+    var user = null;
+    
+      return {
+        setUser : function(aUser){
+          user = aUser;
+        },
+        isLoggedIn : function(){
+          return(user)? user: false;
+        },
+        logOut : function(){
+            user = null;
+        }
+      };
+})
+.config(['$stateProvider', '$urlRouterProvider', 'IdleProvider', 'KeepaliveProvider', function($stateProvider, $urlRouterProvider, IdleProvider, KeepaliveProvider){
+    
+    //Idle timer configuration
+    IdleProvider.idle(900); //15 minutes
+    IdleProvider.timeout(60);
+    KeepaliveProvider.interval(600); //heartbeat every 10 minutes
+    KeepaliveProvider.http('/'); // URL that makes sure session is alive
+    
+    $stateProvider
+    .state('Home', {
+        url: '/',
+        templateUrl: '/Web/Blog/Home.php',
+        controller: 'indexController',
+        authenticate: false
+    })
+    .state('Login', {
+        url: '/login',
+        templateUrl: '/Web/Blog/Login.php',
+        controller: 'indexController as lg',
+        authenticate: false
+    })
+    .state('Resume', {
+        url: '/resume',
+        templateUrl: '/Web/Resume/myresume.php',
+        authenticate: false
+    })
+    .state('CreatePost', {
+        url: '/create',
+        templateUrl: '/Web/Blog/postCreate.php',
+        authenticate: true
+    })
+    .state('EditPost', {
+        url: '/edit',
+        templateUrl: '/Web/Blog/editPost.php',
+        authenticate: true
+    });
+    
+    $urlRouterProvider.otherwise("/");
+}])
+.run(['$rootScope', '$state', 'authProvider', 'Idle', function ($rootScope, $state,     authProvider, Idle) {
+    
+    //This will determine if a page is available to a user. If not, redirect them.
+    $rootScope.$watch(function(){
+            return $state.current.name;
+        }, function(a){
+           if($state.current.authenticate && !authProvider.isLoggedIn()){
+              $state.go("Home", {});
+              }
+        });
+    
+    //This handles session timeouts.
+    Idle.watch();
+    $rootScope.$on('IdleStart', function(){
+        //Begin countdown if user is idle.
+    });
+    $rootScope.$on('IdleTimeout', function(){
+        authProvider.logOut();
+    })
+  }]);

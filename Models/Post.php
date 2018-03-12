@@ -12,7 +12,7 @@
             $this->author = $author;
             $this->title = $title;
             $this->body = $body;
-            $this->datePosted = $rawDate;
+            $this->datePosted = date("Y-m-d H:i:s", strtotime($rawDate));
             $this->removed = $removed;
         }
     }

@@ -23,7 +23,7 @@
         
             $data[] = []; 
             $counter = 0;
-            $sql = "select p.*, u.firstname, u.lastname from posts p, users u where p.userid = (select id from users where username = 'bung')";
+            $sql = "select p.*, u.firstname, u.lastname from posts p, users u where p.userid = (select id from users where username = 'bung') order by datePosted desc";
 
             if($result = $conn->query($sql)){
                 //output result
@@ -49,11 +49,17 @@
         if(!isset($_POST['topic']) && !isset($_POST['body'])){
             exit;
         }
-        $data = [];
-        $data = $_POST['topic'];
-        $data = $_POST['body'];
-        
-        echo json_encode(array("topic"=>$data[0], "body"=>$data[1]));
+        else{
+            if(createNewPost($_SESSION['user'], $_POST['topic'], $_POST['body'])){
+                echo json_encode(array("Success:"=>true));
+                exit;
+            }
+            else{
+                echo json_encode(array("Success:"=>false));
+                exit;
+            }
+        }
+        echo json_encode(array("topic"=>$_POST['topic'], "body"=>$_POST['body']));
     }
 
     function login(){
@@ -107,4 +113,6 @@
             case 'createPost' : createPost(); break;
         }
     }
+
+    createPost();
 ?>

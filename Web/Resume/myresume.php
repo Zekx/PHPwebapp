@@ -1,25 +1,7 @@
 <title>About Me</title>
         <!--CSS code -->
         <link rel="stylesheet" href="/Content/animation.css">
-        <link rel="stylesheet" href="/Content/bootstrap.min.css">
         <link rel="stylesheet" href="/Content/index.css">
-
-        <!--Scripts must be loaded in a specific order! -->
-        <script type="text/javascript"
-                src="https://code.angularjs.org/1.6.5/angular.js"
-                asp-fallback-src="/Scripts/angular.js"></script>
-        <script type="text/javascript"
-                src="https://code.angularjs.org/1.6.5/angular-animate.min.js"
-                asp-fallback-src="/Scripts/angular-route.min.js"></script>
-        <script type="text/javascript"
-                src="https://code.angularjs.org/1.6.5/angular-route.min.js"
-                asp-fallback-src="/Scripts/angular-animate.min.js"></script>
-        <script type="text/javascript"
-                src="https://code.angularjs.org/1.6.5/angular-sanitize.js"
-                asp-fallback-src="/Scripts/angular-sanitize.js"></script>
-        <script type="text/javascript" src="/Scripts/jquery.min.js"></script>
-
-        <script type="text/javascript" src="../../index.js"></script>
 
         <div ng-app='index' style="padding:15px">
             <div class="page-header container-fluid" style="padding:10px;background-color:gold">

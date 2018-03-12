@@ -17,13 +17,15 @@
             //Create Connection
             $conn = new mysqli($servername, $username, $password, $db);
             if(mysqli_connect_errno()){
-                printf("Connect failed: %s\n", mysqli_connect_error());
-                exit();
+                //printf("Connect failed: %s\n", mysqli_connect_error());
+                $arr = array('error'=>'Connect failed...');
+                json_encode($arr);
+                exit;
             }    
         
             $data[] = []; 
             $counter = 0;
-            $sql = "select p.*, u.firstname, u.lastname from posts p, users u where p.userid = (select id from users where username = 'bung')";
+            $sql = "select p.*, u.firstname, u.lastname from posts p, users u where p.userid = (select id from users where username = 'bung') order by datePosted desc";
 
             if($result = $conn->query($sql)){
                 //output result
@@ -39,9 +41,11 @@
             $conn->close();
 
             echo json_encode($data);
+            exit;
         }
         catch(Exception $e){
             echo $e->getMessage();
+            exit;
         }
     }
 
@@ -49,7 +53,16 @@
         if(!isset($_POST['topic']) && !isset($_POST['body'])){
             exit;
         }
-        
+        else{
+            if(createNewPost($_SESSION['user'], $_POST['topic'], $_POST['body'])){
+                echo json_encode(array("Success"=>true));
+                exit;
+            }
+            else{
+                echo json_encode(array("Success"=>false));
+                exit;
+            }
+        }
         echo json_encode(array("topic"=>$_POST['topic'], "body"=>$_POST['body']));
     }
 
@@ -75,9 +88,9 @@
                 unset($_SESSION['error']);
             }
             $_SESSION["user"] = $user->username;
-            $_SESSION["logged"] = true;
+            $_SESSION["logged"] = hash('sha256', $user->firstname.$user->lastname);
             
-            header("Location:" . ' http://localhost/index.php');
+            header("Location:" . ' http://localhost/Web/Blog/Home.php');
             exit;
         }
         else{
@@ -94,14 +107,15 @@
         header("Location: {$_SERVER['HTTP_REFERER']}");
         exit;
     }
-
-    if(isset($_POST['action']) && !empty($_POST['action'])){
-        $action = $_POST['action'];
-        switch($action){
+    
+    $action = json_decode(file_get_contents("php://input"), true);
+    if(isset($action['action']) && !empty($action['action'])){
+        switch($action['action']){
             case 'getPosts' : getPosts(); break;
             case 'login' : login(); break;  
             case 'logout' : logout(); break;
             case 'createPost' : createPost(); break;
+            case 'getSinglePost' : getSinglePost(); break;
         }
     }
 ?>
